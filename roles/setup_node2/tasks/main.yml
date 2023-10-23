@@ -1,0 +1,35 @@
+---
+  - name: Stop posgresql service
+    service:
+      name: postgresql
+      state: stopped
+  - name: Change listen addresses
+    lineinfile:
+      path: /etc/postgresql/16/main/postgresql.conf
+      regexp: "^listen_addresses = 'localhost, 192.168.57.11'"
+      line: listen_addresses = 'localhost, 192.168.57.12'
+      owner: postgres
+      group: postgres
+      mode: 0644
+  - name: Clear data catalog
+    file:
+      path: /var/lib/postgresql/16/main/
+      state: absent
+  - name: Copy files from master to slave
+    expect:
+      command: 'pg_basebackup -h 192.168.57.11 -U replicator -p 5432 -D /var/lib/postgresql/16/main/ -R -P'
+      responses:
+        '.*Password*': "Otus2022!"
+  - name: Change owner for data directory
+    file:
+      path: /var/lib/postgresql/16/main
+      state: directory
+      recurse: yes
+      owner: postgres
+      group: postgres
+  - name: Start postgresql service
+    service:
+      name: postgresql
+      state: restarted
+      enabled: true
+
