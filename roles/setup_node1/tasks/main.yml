@@ -1,4 +1,5 @@
 ---
+#Создание пользователя для репликации данных
   - name: Create replicator user
     community.postgresql.postgresql_user:
       name: replicator
@@ -6,6 +7,7 @@
       password: "Otus2022!"
     environment:
       PGOPTIONS: "-c password_encryption=scram-sha-256"
+#Создание пользователя для резервирования данных
   - name: Create barman user
     community.postgresql.postgresql_user:
       name: barman
@@ -13,11 +15,13 @@
       password: "Otus2022!"
     environment:
       PGOPTIONS: "-c password_encryption=scram-sha-256"
+#Создание базы данных otus
   - name: Create DB otus
     community.postgresql.postgresql_db:
       name: otus
       encoding: UTF-8
-      template: template0    
+      template: template0
+#Создание таблицы в БД otus
   - name: Create table in DB otus
     community.postgresql.postgresql_table:
       db: otus
@@ -25,6 +29,7 @@
       columns:
       - id int
       - name varchar
+#Создание записи в таблице
   - name: Insert data to table
     community.postgresql.postgresql_query:
       db: otus
