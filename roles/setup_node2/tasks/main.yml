@@ -1,8 +1,10 @@
 ---
+#Остановка сервиса PostgreSQL
   - name: Stop posgresql service
     service:
       name: postgresql
       state: stopped
+#Изменение прослушиваемого адреса в файле конфигурации PostgreSQL
   - name: Change listen addresses
     lineinfile:
       path: /etc/postgresql/16/main/postgresql.conf
@@ -11,15 +13,18 @@
       owner: postgres
       group: postgres
       mode: 0644
+#Удаление данных из каталога СУБД
   - name: Clear data catalog
     file:
       path: /var/lib/postgresql/16/main/
       state: absent
+#Копирование данных с основного сервера
   - name: Copy files from master to slave
     expect:
       command: 'pg_basebackup -h 192.168.57.11 -U replicator -p 5432 -D /var/lib/postgresql/16/main/ -R -P'
       responses:
         '.*Password*': "Otus2022!"
+#Изменение прав доступа к каталогу данных
   - name: Change owner for data directory
     file:
       path: /var/lib/postgresql/16/main
@@ -27,6 +32,7 @@
       recurse: yes
       owner: postgres
       group: postgres
+#Запуск сервиса POstgreSQL
   - name: Start postgresql service
     service:
       name: postgresql
