@@ -1,0 +1,106 @@
+---
+  - name: Install barman package
+    apt:
+      name:
+      - barman
+      - barman-cli
+      - postgresql-client-16
+      state: latest
+      update_cache: true
+    when: (ansible_hostname == "barman")
+
+  - name: Generate SSH key on barman
+    user:
+      name: barman
+      generate_ssh_key: yes
+      ssh_key_type: rsa
+      ssh_key_bits: 4096
+      force: no
+    when: (ansible_hostname == "barman")
+  - name: Copy public key to host
+    fetch:
+      src: /var/lib/barman/.ssh/id_rsa.pub
+      dest: ./templates/id_rsa.pub.barman
+      flat: yes
+    when: (ansible_hostname == "barman")
+
+  - name: Generate SSH key on node1
+    user:
+      name: postgres
+      generate_ssh_key: yes
+      ssh_key_type: rsa
+      ssh_key_bits: 4096
+      force: no
+    when: (ansible_hostname == "node1")
+  - name: Copy public key to host
+    fetch:
+      src: /var/lib/postgresql/.ssh/id_rsa.pub
+      dest: ./templates/id_rsa.pub.node1
+      flat: yes
+    when: (ansible_hostname == "node1")
+
+  - name: Copy SSH key to node1
+    template:
+      src: id_rsa.pub.barman
+      dest: /home/vagrant/
+    when: (ansible_hostname == "node1")
+  - name: Copy SSH key to barman
+    template:
+      src: id_rsa.pub.node1
+      dest: /home/vagrant/
+    when: (ansible_hostname == "barman")
+
+  - name: Add SSH key to barman authorized_key
+    shell: "cat /home/vagrant/id_rsa.pub.node1 >> /var/lib/barman/.ssh/authorized_keys"
+    register: addtoauth
+    when: (ansible_hostname == "barman")
+  - name: Change user for authorized_keys
+    file:
+      path: /var/lib/barman/.ssh/authorized_keys
+      owner: barman
+      group: barman
+      mode: 0600
+    when: (ansible_hostname == "barman")
+  - name: Touch authorized_key on node1
+    file:
+      path: /var/lib/postgresql/.ssh/authorized_keys
+      state: touch
+      owner: postgres
+      group: postgres
+      mode: 0600
+    when: (ansible_hostname == "node1")
+  - name: Add SSH key to node1 authorized_key
+    shell: "cat /home/vagrant/id_rsa.pub.barman >> /var/lib/postgresql/.ssh/authorized_keys"
+    register: addtoauth
+    when: (ansible_hostname == "node1")
+
+  - name: Copy pgpass to barman server
+    template:
+      src: pgpass
+      dest: /var/lib/barman/.pgpass
+      owner: barman
+      group: barman
+      mode: 0600
+    when: (ansible_hostname == "barman")
+  - name: Copy barman config file
+    template: 
+      src: barman.conf
+      dest: /etc/barman.conf
+      owner: barman
+      group: barman
+      mode: 0600
+    when: (ansible_hostname == "barman")
+  - name: Copy node1 config file
+    template: 
+      src: node1.conf
+      dest: /etc/barman.d/node1.conf
+      owner: barman
+      group: barman
+      mode: 0600 
+    when: (ansible_hostname == "barman")
+
+  - name: Initialize barman for node1
+    shell: |
+      barman switch-wal node1
+      barman cron
+    when: (ansible_hostname == "barman")
