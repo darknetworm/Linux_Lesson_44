@@ -20,14 +20,15 @@
 
  ---
  ### Проверка работоспособности стенда
-
- ![1_node1](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/eef452f8-c8e6-4794-adfb-eb67ebb633ce)
-
-![1_node2](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/43c44157-9674-492a-a846-7189f52821c5)
-
-![1_barman](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/360ad3e3-0a44-4d58-bdef-5156c8bd87a7)
-
-![2_node1](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/cce68b20-76ee-4e09-a86c-bac3d69fd04f)
-
-![2_barman](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/783b9207-4c0d-4a03-aa62-9ac329d1360d)
+Для проверки репликации основного сервера подключаемся к СУБД PostgreSQL на основном сервере и сервере репликации.  
+На основном серевере проверяем существующие БД, в том числе присутствие БД otus с записями, произвденными в процессе настройки стенда с помощью Ansible. Создаем тестовую БД otus_test.  
+ ![1_node1](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/eef452f8-c8e6-4794-adfb-eb67ebb633ce)  
+На сервере репликации до создания тестовой БД также проверяем наличие идентичных с основным сервером баз данных и записей. После создания БД otus_test на основном сервере, проверяем появление записи о ней на сервере репликации.  
+![1_node2](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/43c44157-9674-492a-a846-7189f52821c5)  
+Для проверки резервного копирования c основного сервера на сервер barman проверяем их взаимодействие. После проверки запускаем процесс резервного копирования.  
+![1_barman](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/360ad3e3-0a44-4d58-bdef-5156c8bd87a7)  
+На основном сервере проверяем существующие базы данных, после чего удаляем некоторые из них (в нашем случае otus и otus_test). После процесса восстановления из резервной копии перезапускаем сервис PostgreSQL и вновь проверяем наличие баз данных. Убеждаемся, что процесс восстановления прошел успешно.  
+![2_node1](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/cce68b20-76ee-4e09-a86c-bac3d69fd04f)  
+На сервере резервирования проверяем наличие созданной копии и ее имя. Запускаем процесс восстановления данных основного сервера с сервера резервного копирования.  
+![2_barman](https://github.com/darknetworm/Linux_Lesson_44/assets/82410807/783b9207-4c0d-4a03-aa62-9ac329d1360d)  
 
