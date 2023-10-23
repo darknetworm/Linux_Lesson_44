@@ -1,0 +1,32 @@
+---
+  - name: Install PostgreSQL and pip
+    apt:
+      name:
+      - postgresql
+      - python3-pip
+      - barman-cli
+      state: latest
+      update_cache: true
+  - name: Install python library for working with postgresql
+    pip:
+      name: psycopg2-binary
+  - name: Copy pg_hba.conf
+    template:
+      src: pg_hba.conf
+      dest: /etc/postgresql/16/main/pg_hba.conf
+      owner: postgres
+      group: postgres
+      mode: 0640
+  - name: Copy postgresql.conf
+    template:
+      src: postgresql.conf
+      dest: /etc/postgresql/16/main/postgresql.conf
+      owner: postgres
+      group: postgres
+      mode: 0644
+  - name: Restart postgresql service
+    service:
+      name: postgresql
+      state: restarted
+      enabled: true
+
