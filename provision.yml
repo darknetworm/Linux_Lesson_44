@@ -1,0 +1,38 @@
+---
+  - name: Tasks for all
+    hosts: all
+    become: true
+    pre_tasks:
+    - name: Stop and disable firewall
+      service:
+        name: ufw
+        state: stopped
+        enabled: false
+    - name: Add postgresql repository and signing key
+      shell: |
+        sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+  - name: Setup sql servers
+    hosts: node1,node2
+    become: true
+    roles:
+    - role: setup_sql_servers
+
+  - name: Setup sql node1
+    hosts: node1
+    become: true
+    roles:
+    - role: setup_node1
+
+  - name: Setup sql node2
+    hosts: node2
+    become: true
+    roles:
+    - role: setup_node2
+
+  - name: Setup barman server
+    hosts: node1,barman
+    become: true
+    roles:
+    - role: setup_barman
