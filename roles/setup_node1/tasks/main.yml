@@ -10,7 +10,7 @@
     community.postgresql.postgresql_user:
       name: barman
       role_attr_flags: SUPERUSER
-      password: "Otus2022!" 
+      password: "Otus2022!"
     environment:
       PGOPTIONS: "-c password_encryption=scram-sha-256"
   - name: Create DB otus
