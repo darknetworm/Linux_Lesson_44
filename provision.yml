@@ -1,36 +1,39 @@
 ---
+#Общие задачи для серверов
   - name: Tasks for all
     hosts: all
     become: true
     pre_tasks:
+#Отсановка и деактивация стандартного firewall
     - name: Stop and disable firewall
       service:
         name: ufw
         state: stopped
         enabled: false
+#Добавление репозитория PostgreSQL
     - name: Add postgresql repository and signing key
       shell: |
         sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
         wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-
+#Настройка серверов PostgreSQL
   - name: Setup sql servers
     hosts: node1,node2
     become: true
     roles:
     - role: setup_sql_servers
-
+#Настройка основного сервера
   - name: Setup sql node1
     hosts: node1
     become: true
     roles:
     - role: setup_node1
-
+#Настройка сервера репликации
   - name: Setup sql node2
     hosts: node2
     become: true
     roles:
     - role: setup_node2
-
+#Настройка резервного копирования
   - name: Setup barman server
     hosts: node1,barman
     become: true
